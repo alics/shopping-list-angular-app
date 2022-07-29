@@ -1,8 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { throwError } from 'rxjs';
+import { Subject, throwError } from 'rxjs';
 import { root } from 'rxjs/internal-compatibility';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
+import { User } from './user.model';
 
 export interface AuthResponseData {
   idToken: string;
@@ -15,6 +16,8 @@ export interface AuthResponseData {
 
 @Injectable({ providedIn: root })
 export class AuthService {
+  user = new Subject<User>();
+
   constructor(private http: HttpClient) {}
 
   signUp(email: string, password: string) {
@@ -27,7 +30,17 @@ export class AuthService {
           returnSecureToken: true,
         }
       )
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError(this.handleError),
+        tap((rspData) => {
+          this.handleAuthentication(
+            rspData.email,
+            rspData.localId,
+            rspData.idToken,
+            +rspData.expiresIn
+          );
+        })
+      );
   }
 
   signIn(email: string, password: string) {
@@ -40,7 +53,17 @@ export class AuthService {
           returnSecureToken: true,
         }
       )
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError(this.handleError),
+        tap((rspData) => {
+          this.handleAuthentication(
+            rspData.email,
+            rspData.localId,
+            rspData.idToken,
+            +rspData.expiresIn
+          );
+        })
+      );
   }
 
   private handleError(errorResponse: HttpErrorResponse) {
@@ -60,5 +83,17 @@ export class AuthService {
         break;
     }
     return throwError(errMsg);
+  }
+
+  private handleAuthentication(
+    email: string,
+    userId: string,
+    token: string,
+    expiresIn: number
+  ) {
+    const expDate = new Date(new Date().getTime() + expiresIn * 1000);
+    const user = new User(email, userId, token, expDate);
+
+    this.user.next(user);
   }
 }
