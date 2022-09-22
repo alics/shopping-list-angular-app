@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -10,6 +9,7 @@ import { RecipeListComponent } from './recipe-list/recipe-list.component';
 import { RecipeStartComponent } from './recipe-start/recipe-start.component';
 import { RecipesComponent } from './recipes.component';
 import { RecipeRoutingModule } from './recipe-routing.module';
+import { SharedModule } from '../shared/shared.module';
 
 
 @NgModule({
@@ -21,7 +21,7 @@ import { RecipeRoutingModule } from './recipe-routing.module';
         RecipeStartComponent,
         RecipeEditComponent,
     ],
-    imports: [RouterModule, CommonModule, ReactiveFormsModule, RecipeRoutingModule],
+    imports: [RouterModule, ReactiveFormsModule, RecipeRoutingModule, SharedModule],
 })
 export class RecipeModule {
 
